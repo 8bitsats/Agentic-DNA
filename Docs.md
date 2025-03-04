@@ -1,235 +1,393 @@
-Below is a comprehensive response to your query, combining all the provided elements into a single, cohesive framework for the **"Onchain Agentic DNA for AI Agents"** by Cheshire Terminal. This framework integrates AI agents with blockchain technology (Solana and Base), incorporates voice capabilities via Eleven Labs, and leverages Nvidia’s Evo 2 model for agentic DNA generation. It is designed to be modular, extensible, and suitable for Eliza OS, virtual agents, and Web 3 applications.
+This will guide you through creating a DNA generator for AI agents using NVIDIA's Evo 2 model, based on the provided concepts and requirements. We’ll implement this as a reusable TypeScript function that AI agents can call, and I’ll explain how to integrate it into an agent framework like Eliza, specifically with the Direct client. This solution will be in-depth, covering the model, implementation, integration, and practical considerations.
 
 ---
 
-# Onchain Agentic DNA for AI Agents by Cheshire Terminal
+### Step 1: Understanding the NVIDIA Evo 2 Model and API
 
-## Overview
+The NVIDIA Evo 2 model (`evo2-40b`) is a powerful 40-billion-parameter biological foundation model designed for generating DNA sequences. It’s accessible through the NVIDIA Health API at:
 
-The **Onchain Agentic DNA for AI Agents** framework, developed by Cheshire Terminal, is a modular, scalable system that enables the creation, management, and deployment of autonomous AI agents within Web 3 ecosystems. Building on the Eliza framework, it integrates blockchain technology (primarily Solana, with extensibility to Base), voice synthesis via Eleven Labs, and advanced AI capabilities powered by Nvidia’s Evo 2 model (Arc/Evo2-40B). The framework introduces **Agentic DNA**—a digital blueprint encoding an agent’s identity, behavior, and capabilities—stored on-chain for transparency and autonomy. This response outlines the architecture, implementation, and deployment of this system, tailored for applications like Eliza OS (a decentralized OS for AI agents), virtual agents, and decentralized token launches.
-
-### Key Objectives
-- **Unique Identities**: Assign each AI agent a distinct, blockchain-verified "Agentic DNA."
-- **Autonomous Operations**: Enable agents to execute on-chain actions (e.g., token swaps, staking) independently.
-- **Voice Interaction**: Incorporate natural speech synthesis using Eleven Labs for user engagement.
-- **Modularity**: Provide a flexible design adaptable to various blockchains, AI models, and use cases.
-
----
-
-## Core Architecture
-
-The framework is structured hierarchically, combining Eliza’s runtime with on-chain storage, voice integration, and Evo 2-powered DNA generation. Below are the core components:
-
-### 1. Agentic DNA (On-Chain Configuration)
-- **Description**: Agentic DNA is a JSON-encoded structure defining an agent’s properties, inspired by biological DNA but adapted for digital agents. It is stored on-chain as NFT metadata, with full configurations hosted on IPFS.
-- **Fields**:
-  - `name`: Agent identifier (e.g., "TradeBot").
-  - `description`: Purpose or role.
-  - `voice`: Eleven Labs settings (e.g., model, tone).
-  - `ai`: AI model provider and parameters (e.g., Evo 2, learning rate).
-  - `capabilities`: Supported actions (e.g., "swap_token").
-  - `platform`: Target blockchain (e.g., "solana", "base").
-- **Example**:
-  ```json
-  {
-    "name": "TradeBot",
-    "description": "Autonomous trading agent",
-    "voice": { "provider": "elevenlabs", "model": "en_US-male-medium" },
-    "ai": { "provider": "evo2", "model": "arc/evo2-40b", "learning_rate": 0.001 },
-    "capabilities": ["swap_token", "stake"],
-    "platform": "solana"
-  }
-  ```
-
-### 2. High-Level Planner (HLP)
-- **Role**: The central intelligence hub, processing inputs and coordinating actions using large language models (LLMs) or Evo 2-derived models.
-- **Features**:
-  - Integrates with Eliza’s `IAgentRuntime` for state/memory management.
-  - Executes on-chain logic (e.g., token swaps via Jupiter).
-  - Generates voice responses via Eleven Labs.
-- **Example**: Interprets "Swap 10 SOL for USDC" and delegates tasks.
-
-### 3. Low-Level Planners (Workers)
-- **Role**: Specialized sub-agents executing tasks under HLP direction.
-- **Capabilities**: Configured via DNA, e.g., blockchain transactions or data processing.
-
-### 4. Action Space
-- **Description**: A set of extensible functions agents can perform.
-- **Examples**:
-  - `SWAP_TOKEN`: Executes token swaps on Solana.
-  - `GENERATE_SPEECH`: Produces voice output via Eleven Labs.
-- **Implementation**:
-  ```typescript
-  const swapAction = {
-    name: "SWAP_TOKEN",
-    handler: async (runtime, message) => {
-      const [amount, token] = parseSwapRequest(message.content.text);
-      const signature = await executeSwap(runtime, { amount, token });
-      const audio = await generateVoice(runtime, `Swap completed: ${signature}`);
-      return { text: `Swap completed: ${signature}`, audio };
-    }
-  };
-  ```
-
-### 5. Voice Integration (Eleven Labs)
-- **Role**: Enables natural speech synthesis for agent responses.
-- **Implementation**: Uses Eleven Labs API, configured via DNA.
-- **Example**:
-  ```typescript
-  async function generateVoice(runtime, text) {
-    const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech", {
-      method: "POST",
-      headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY },
-      body: JSON.stringify({ text, voice_id: runtime.dna.voice.model })
-    });
-    return response.body;
-  }
-  ```
-
-### 6. Blockchain Integration
-- **Supported Chains**: Solana (primary) and Base (extensible).
-- **Features**:
-  - Stores DNA as NFT metadata (e.g., Metaplex on Solana).
-  - Executes transactions via smart contracts.
-
-### 7. DNA Generation with Evo 2
-- **Description**: Nvidia’s Evo 2 (40B parameters) generates synthetic DNA-like sequences, fine-tuned to produce agentic DNA.
-- **Process**:
-  - Evo 2 generates a nucleotide sequence (e.g., "TCGCTGATT...").
-  - A mapping scheme translates it to JSON (e.g., "ATCG" → `{ "learning_rate": 0.001 }`).
-- **Example Output**:
-  ```json
-  {
-    "model_type": "evo2-agent",
-    "hyperparameters": { "learning_rate": 0.001 },
-    "behavior": "cooperative",
-    "platform": "solana"
-  }
-  ```
-
----
-
-## Key Features
-
-### On-Chain Integration
-- **Capabilities**: Token swaps (Jupiter), staking, governance.
-- **Storage**: DNA as NFTs ensures transparency and ownership.
-
-### Voice Capabilities
-- **Real-Time Synthesis**: Converts text responses to speech.
-- **Configurable**: Voice settings in DNA (e.g., model, tone).
-
-### Modularity
-- **Extensible**: Supports new blockchains, AI models, or voice providers via plugins.
-
-### Autonomy
-- **Behavior**: Agents act independently based on DNA (e.g., a trading agent executes swaps autonomously).
-
----
-
-## Implementation Details
-
-### 1. DNA Generator (Python with Evo 2)
-```python
-from evo2 import Evo2Model  # Hypothetical API
-import json
-
-class AgenticDNAGenerator:
-    def __init__(self):
-        self.evo2 = Evo2Model.from_pretrained("arc/evo2-40b")
-        self.mapping = {"ATCG": {"learning_rate": 0.001}, "GCTA": {"behavior": "cooperative"}}
-
-    def generate_dna(self):
-        sequence = self.evo2.generate(length=100)
-        dna = {"model_type": "evo2-agent", "platform": "solana"}
-        for i in range(0, len(sequence), 4):
-            chunk = sequence[i:i+4]
-            if chunk in self.mapping:
-                dna.update(self.mapping[chunk])
-        return json.dumps(dna)
-
-generator = AgenticDNAGenerator()
-dna_json = generator.generate_dna()
-print(dna_json)
+```
+https://health.api.nvidia.com/v1/biology/arc/evo2-40b/generate
 ```
 
-### 2. Blockchain Deployment (TypeScript)
+This API accepts POST requests with a JSON payload containing parameters such as the initial DNA sequence and the number of nucleotides to generate. Authentication is handled via an `NVCF_RUN_KEY`, typically passed in the `Authorization` header as a bearer token.
+
+Key aspects of the API:
+- **Input**: A starting DNA sequence (e.g., "ATG") and generation parameters.
+- **Output**: A generated DNA sequence extending the input, potentially with metadata like token probabilities if requested.
+- **Key Parameters**:
+  - `sequence`: The required starting DNA sequence (minimum length ≥ 1).
+  - `num_tokens`: The number of additional nucleotides to generate (default: 100).
+  - `temperature`: Controls randomness in generation (default: 0.7).
+  - `top_k`: Limits sampling to the top K probable tokens (default: 3).
+  - `top_p`: Enables nucleus sampling (default: 1).
+  - `random_seed`: Optional, for reproducible outputs.
+  - `enable_sampled_probs`: Optional, includes probabilities for generated tokens (default: false).
+
+The model is capable of generating sequences up to 1 million kilobases, making it ideal for biological simulations, research tasks, or creative applications within an AI agent’s capabilities.
+
+---
+
+### Step 2: Creating the Reusable DNA Generator Function
+
+To enable AI agents to use this API, we’ll create a TypeScript function called `generateDNA`. This function will:
+1. Accept a request object with API parameters.
+2. Use the `NVCF_RUN_KEY` for authentication.
+3. Make an asynchronous HTTP request to the NVIDIA API.
+4. Return the generated DNA sequence, with robust error handling.
+
+Here’s the detailed implementation:
+
 ```typescript
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { Program, AnchorProvider } from '@project-serum/anchor';
+// dnaGenerator.ts
+import fetch from 'node-fetch'; // Required for Node.js < 18; omit if using built-in fetch
 
-const idl = { /* Simplified IDL */ };
-const programId = new PublicKey("YourProgramIdHere");
-
-class AgentDeployer {
-  constructor(connection, wallet) {
-    this.program = new Program(idl, programId, new AnchorProvider(connection, wallet, {}));
-  }
-
-  async deployAgent(dna) {
-    const agentKeypair = Keypair.generate();
-    const tx = await this.program.rpc.createAgent(dna, {
-      accounts: { agent: agentKeypair.publicKey, /* ... */ },
-      signers: [agentKeypair]
-    });
-    return tx;
-  }
+// Request interface reflecting API parameters
+export interface DNARequest {
+  sequence: string;                  // Starting DNA sequence (required)
+  num_tokens?: number;               // Number of nucleotides to generate (default: 100)
+  temperature?: number;              // Randomness control (default: 0.7)
+  top_k?: number;                    // Top K sampling (default: 3)
+  top_p?: number;                    // Top P sampling (default: 1)
+  random_seed?: number;              // Seed for reproducibility (optional)
+  enable_logits?: boolean;           // Include logits in response (default: false)
+  enable_sampled_probs?: boolean;    // Include probabilities (default: false)
+  enable_elapsed_ms_per_token?: boolean; // Include timing data (default: false)
 }
 
-const connection = new Connection("https://api.devnet.solana.com");
-const wallet = Keypair.generate();
-const deployer = new AgentDeployer(connection, wallet);
-deployer.deployAgent(dna_json).then(tx => console.log(`Agent deployed: ${tx}`));
+// Response interface based on expected API output
+export interface DNAResponse {
+  generated_sequence: string;        // The generated DNA sequence
+  sampled_probs?: number[];          // Probabilities, if enabled
+  [key: string]: any;                // Allow for additional fields
+}
+
+/**
+ * Generates a DNA sequence using NVIDIA's Evo 2 model.
+ * @param request - The DNA generation parameters.
+ * @param runKey - The NVCF_RUN_KEY for API authentication.
+ * @returns A promise resolving to the generated DNA response.
+ * @throws Error if the API request fails.
+ */
+export async function generateDNA(request: DNARequest, runKey: string): Promise<DNAResponse> {
+  const url = 'https://health.api.nvidia.com/v1/biology/arc/evo2-40b/generate';
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${runKey}`,
+    'nvcf-poll-seconds': '300', // Polling timeout for long-running requests
+  };
+
+  // Validate required fields
+  if (!request.sequence || request.sequence.length < 1) {
+    throw new Error('A non-empty starting sequence is required.');
+  }
+
+  const body = JSON.stringify({
+    num_tokens: 100,           // Default value
+    temperature: 0.7,          // Default value
+    top_k: 3,                  // Default value
+    top_p: 1,                  // Default value
+    ...request,                // Override defaults with provided values
+  });
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`API request failed: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  if (!data.generated_sequence) {
+    throw new Error('Invalid API response: missing generated_sequence');
+  }
+
+  return data as DNAResponse;
+}
 ```
 
-### 3. Eliza OS Runtime Extension
-- **Runtime**: Extends `IAgentRuntime` to load DNA from Solana/Base, manage state, and integrate Eleven Labs.
-- **Example**:
-  ```typescript
-  class ElizaAgentRuntime extends IAgentRuntime {
-    async loadAgent(agentId) {
-      const nft = await fetchNFT(agentId);
-      const dna = await fetchIPFS(nft.metadata.uri);
-      this.configureAgent(dna);
+**Key Features**:
+- **Type Safety**: Interfaces ensure parameters and responses are well-defined.
+- **Defaults**: Sensible defaults are applied if optional parameters are omitted.
+- **Error Handling**: Checks for network errors, invalid responses, and missing required fields.
+- **Flexibility**: Additional response fields are supported via `[key: string]: any`.
+
+**Dependencies**:
+- If using Node.js < 18, install `node-fetch`: `npm install node-fetch`. For Node.js 18+, use the built-in `fetch`.
+
+**Notes**:
+- The `DNAResponse` interface assumes a basic structure (`{ "generated_sequence": "..." }`). After testing with the actual API, adjust this to match the full response schema.
+
+---
+
+### Step 3: Parsing User Input for Agent Use
+
+AI agents need to interpret user requests like "Generate a DNA sequence starting with ATG, length 50." We’ll create a helper function to parse such inputs and prepare a `DNARequest`:
+
+```typescript
+// dnaGenerator.ts (continued)
+
+/**
+ * Parses a user message to extract DNA generation parameters.
+ * @param text - The user’s input text.
+ * @returns A DNARequest object or null if parsing fails.
+ */
+export function parseDNARequest(text: string): DNARequest | null {
+  // Match format: "starting with [sequence], length [number]"
+  const match = text.match(/starting with (\w+), length (\d+)/i);
+  if (!match) return null;
+
+  const sequence = match[1].toUpperCase(); // e.g., "ATG"
+  const totalLength = parseInt(match[2]);  // e.g., 50
+  const num_tokens = totalLength - sequence.length;
+
+  // Validate
+  if (num_tokens <= 0) return null;
+  if (!/^[ACGT]+$/i.test(sequence)) return null; // Ensure valid DNA bases
+
+  return {
+    sequence,
+    num_tokens,
+  };
+}
+```
+
+**How It Works**:
+- Extracts the starting sequence and total desired length.
+- Calculates `num_tokens` as the number of nucleotides to generate beyond the starting sequence.
+- Validates that the sequence contains only A, C, G, T (case-insensitive).
+
+**Example**:
+- Input: "starting with ATG, length 50"
+- Output: `{ sequence: "ATG", num_tokens: 47 }`
+
+---
+
+### Step 4: Integrating with the Eliza Framework (Direct Client)
+
+The Eliza framework allows AI agents to process messages and perform actions. The Direct client, built with Express.js, provides an API-driven interface (e.g., `POST /:agentId/message`). We’ll integrate the DNA generator as a custom action that agents can trigger based on user input.
+
+#### Defining the Action
+
+In Eliza, actions are objects with a `validate` function (to check applicability) and a `handler` function (to execute the action). Here’s the DNA generation action:
+
+```typescript
+// actions.ts
+import { Action, IAgentRuntime, Memory } from '@elizaos/core'; // Hypothetical Eliza imports
+import { generateDNA, DNARequest, parseDNARequest } from './dnaGenerator';
+
+export const dnaGenerationAction: Action = {
+  name: 'GENERATE_DNA',
+  similes: ['CREATE_DNA', 'MAKE_DNA_SEQUENCE'], // Alternative triggers
+  description: 'Generates a DNA sequence using NVIDIA’s Evo 2 model',
+  suppressInitialMessage: true, // Prevent default response; handler manages output
+  validate: async (runtime: IAgentRuntime, message: Memory): Promise<boolean> => {
+    const text = message.content.text.toLowerCase();
+    return (
+      text.includes('generate dna') ||
+      text.includes('create dna sequence') ||
+      !!parseDNARequest(message.content.text)
+    );
+  },
+  handler: async (runtime: IAgentRuntime, message: Memory): Promise<boolean> => {
+    // Retrieve the API key from agent settings
+    const runKey = runtime.character.settings.secrets?.NVCF_RUN_KEY;
+    if (!runKey) {
+      await runtime.messageManager.createMemory({
+        content: { text: 'Error: NVCF_RUN_KEY is not configured.' },
+        userId: message.userId,
+        roomId: message.roomId,
+      });
+      return true;
+    }
+
+    // Parse the request
+    const params = parseDNARequest(message.content.text);
+    if (!params) {
+      await runtime.messageManager.createMemory({
+        content: { text: 'Please provide a starting sequence and desired length (e.g., "starting with ATG, length 50").' },
+        userId: message.userId,
+        roomId: message.roomId,
+      });
+      return true;
+    }
+
+    try {
+      const response = await generateDNA(params, runKey);
+      await runtime.messageManager.createMemory({
+        content: { text: `Generated DNA sequence: ${response.generated_sequence}` },
+        userId: message.userId,
+        roomId: message.roomId,
+      });
+    } catch (error) {
+      console.error('DNA generation error:', error);
+      await runtime.messageManager.createMemory({
+        content: { text: 'Failed to generate DNA sequence due to an error.' },
+        userId: message.userId,
+        roomId: message.roomId,
+      });
+    }
+
+    return true; // Indicate action was handled
+  },
+};
+```
+
+**Key Components**:
+- **Validation**: Checks if the message indicates a DNA generation request using keywords or the parser.
+- **Handler**: Parses the input, calls `generateDNA`, and stores the result as a new memory in the conversation.
+- **Memory Management**: Uses Eliza’s `messageManager` to persist responses, ensuring they’re accessible to the client.
+
+#### Registering the Action
+
+Add the action to the agent’s runtime during setup:
+
+```typescript
+// runtimeSetup.ts
+import { AgentRuntime } from '@elizaos/core';
+import { dnaGenerationAction } from './actions';
+
+const runtime = new AgentRuntime({
+  // Other configurations (e.g., modelProvider, database)
+  actions: [dnaGenerationAction],
+});
+```
+
+#### Configuring the Character
+
+Define the agent in a character file, including the `NVCF_RUN_KEY`:
+
+```json
+// characters/DNAAgent.json
+{
+  "name": "DNAAgent",
+  "modelProvider": "openai",
+  "clients": ["direct"],
+  "settings": {
+    "secrets": {
+      "NVCF_RUN_KEY": "your_run_key_here"
     }
   }
+}
+```
+
+#### How It Works in the Direct Client
+
+The Direct client’s message endpoint (`POST /:agentId/message`) processes incoming messages:
+
+1. **Message Received**: User sends "Generate a DNA sequence starting with ATG, length 50."
+2. **Action Validation**: The runtime checks all registered actions; `dnaGenerationAction.validate` returns `true`.
+3. **Action Execution**: The `handler` runs, generates the sequence, and creates a new memory.
+4. **Response Delivery**: The Direct client retrieves the latest memory and sends it back as the API response.
+
+Example Express handler (simplified):
+
+```typescript
+// directClient.ts
+import express from 'express';
+import { AgentRuntime } from '@elizaos/core';
+
+const app = express();
+app.use(express.json());
+
+const runtimes: { [agentId: string]: AgentRuntime } = { /* Initialize runtimes */ };
+
+app.post('/:agentId/message', async (req, res) => {
+  const { agentId } = req.params;
+  const message = req.body; // { text: "Generate a DNA sequence..." }
+  const runtime = runtimes[agentId];
+
+  // Process actions
+  await runtime.processActions(message);
+
+  // Retrieve the latest response from memory
+  const response = await runtime.messageManager.getLatestMemory(message.roomId);
+  res.json(response.content);
+});
+```
+
+---
+
+### Step 5: Enhancing the Solution
+
+#### Robust Error Handling
+
+Add specific error cases:
+
+```typescript
+// In generateDNA
+if (!response.ok) {
+  const errorText = await response.text();
+  if (response.status === 401) throw new Error('Invalid NVCF_RUN_KEY');
+  if (response.status === 429) throw new Error('API rate limit exceeded');
+  throw new Error(`API request failed: ${response.status} - ${errorText}`);
+}
+```
+
+#### Advanced Parsing
+
+Use NLP for more flexible input (e.g., "Make a 50-base DNA starting with ATG"):
+
+```typescript
+export function parseDNARequest(text: string): DNARequest | null {
+  const patterns = [
+    /starting with (\w+), length (\d+)/i,
+    /make a (\d+)-base dna starting with (\w+)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const sequence = pattern.source.includes('starting with (\w+)') ? match[1] : match[2];
+      const totalLength = parseInt(pattern.source.includes('length') ? match[2] : match[1]);
+      const num_tokens = totalLength - sequence.length;
+      if (num_tokens > 0 && /^[ACGT]+$/i.test(sequence)) {
+        return { sequence: sequence.toUpperCase(), num_tokens };
+      }
+    }
+  }
+  return null;
+}
+```
+
+#### Testing and Validation
+
+- **Unit Test**:
+  ```typescript
+  const testRequest: DNARequest = { sequence: 'ATG', num_tokens: 47 };
+  const response = await generateDNA(testRequest, 'valid_key');
+  console.assert(response.generated_sequence.startsWith('ATG'), 'Sequence should extend input');
   ```
 
----
+- **API Response**: After initial use, log the full response to refine `DNAResponse`.
 
-## Example Workflow
-1. **Agent Creation**:
-   - Evo 2 generates DNA (e.g., trading agent).
-   - DNA is uploaded to IPFS and minted as an NFT on Solana.
-2. **User Interaction**:
-   - User says: "Swap 10 SOL for USDC."
-   - HLP processes, worker executes swap, Eleven Labs generates voice response.
-3. **Delivery**:
-   - Audio response delivered via Eliza OS interface.
+#### Scalability
 
----
+For large `num_tokens`, consider streaming or async updates:
 
-## Deployment
-- **Requirements**: Node.js, Solana tools, Eleven Labs API key, Nvidia GPU for Evo 2.
-- **Steps**:
-  ```bash
-  npm install @solana/web3.js @metaplex-foundation/js
-  agent create --name "TradeBot" --dna <dna_json>
-  agent start --id "agent_id"
-  ```
+```typescript
+// Future enhancement
+app.get('/:agentId/dna-status/:taskId', async (req, res) => {
+  // Return progress for long-running DNA generation
+});
+```
 
 ---
 
-## Benefits
-- **Transparency**: On-chain DNA ensures verifiable identities.
-- **Interactivity**: Voice enhances user experience.
-- **Scalability**: Supports multiple agents across Solana/Base.
+### Complete Solution
 
----
+1. **DNA Generator** (`dnaGenerator.ts`): As shown above.
+2. **Action Definition** (`actions.ts`): Custom action integrated with Eliza.
+3. **Runtime Setup** (`runtimeSetup.ts`): Register the action.
+4. **Character Config** (`DNAAgent.json`): Include the API key.
+5. **Direct Client**: Processes messages and delivers responses.
 
-## Conclusion
-The "Onchain Agentic DNA for AI Agents" framework by Cheshire Terminal merges blockchain, AI, and voice into a powerful system for Eliza OS and virtual agents. Using Solana, Base, Eleven Labs, and Evo 2, it offers a future-ready solution for Web 3 applications. Start building your agents today!
+**Usage Example**:
+- **Request**: `POST /DNAAgent/message` with `{ "text": "Generate a DNA sequence starting with ATG, length 50" }`
+- **Response**: `{ "text": "Generated DNA sequence: ATG..." }`
 
---- 
-
-This response is self-contained, leveraging the thinking trace’s insights while omitting irrelevant details, and uses markdown for clarity.
+This DNA generator is now a reusable, robust component within your AI agents, fully integrated with the Eliza Direct client, ready to handle biological tasks with NVIDIA’s Evo 2 model!
